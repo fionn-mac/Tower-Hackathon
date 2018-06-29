@@ -35,13 +35,14 @@ net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 # initialize the video stream, allow the cammera sensor to warmup,
 # and initialize the FPS counter
 print("[INFO] starting video stream...")
-vs = cv2.VideoCapture('/home/root1/real-time-object-detection/VID_20180629_192536.mp4')
+vs = cv2.VideoCapture('/home/root1/real-time-object-detection/VID_20180629_192457.mp4')
 #vs = VideoStream(src=0).start()
 #vs = VideoStream(src='/home/root1/Human-detection-and-Tracking/video/2.mp4').start()
 print(vs)
 time.sleep(2.0)
 fps = FPS().start()
 count  = 0
+values = [1,1,1,1,1]
 # loop over the frames from the video stream
 while True:
 	# grab the frame from the threaded video stream and resize it
@@ -62,21 +63,23 @@ while True:
 	detections = net.forward()
 
 	# loop over the detections
-	for i in np.arange(0, detections.shape[2]):
-		# extract the confidence (i.e., probability) associated with
-		# the prediction
-		confidence = detections[0, 0, i, 2]
+	if count%60 == 0:
+		print("Considering this framne")
+		for i in np.arange(0, detections.shape[2]):
+			# extract the confidence (i.e., probability) associated with
+			# the prediction
+			confidence = detections[0, 0, i, 2]
 
-		# filter out weak detections by ensuring the `confidence` is
-		# greater than the minimum confidence
-		if confidence > args["confidence"]:
-			# extract the index of the class label from the
-			# `detections`, then compute the (x, y)-coordinates of
-			# the bounding box for the object
-			idx = int(detections[0, 0, i, 1])
-			with open("status.txt", "w") as f:
+			# filter out weak detections by ensuring the `confidence` is
+			# greater than the minimum confidence
+			if confidence > args["confidence"]:
+				# extract the index of the class label from the
+				# `detections`, then compute the (x, y)-coordinates of
+				# the bounding box for the object
+				idx = int(detections[0, 0, i, 1])
 				if idx==15:
-					f.write("Occupied")
+					values.append(1)
+					values = values[1:]
 					box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
 					(startX, startY, endX, endY) = box.astype("int")
 
@@ -89,7 +92,9 @@ while True:
 					cv2.putText(frame, label, (startX, y),
 						cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
 				else:
-					f.write("Not Occupied")
+					values.append(0)
+					values = values[1:]
+					print(values)
 			
 
 	# show the output frame
@@ -101,6 +106,13 @@ while True:
 		break
 
 	# update the FPS counter
+	if count%60 == 0:
+		with open('status.txt','w') as f:
+			if sum(values)>2:
+				f.write('1')
+			else:
+				f.write('0')
+		f.close()
 	count = count+1
 	fps.update()
 
@@ -111,4 +123,4 @@ print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 # do a bit of cleanup
 cv2.destroyAllWindows()
-vs.stop()
+#vs.stop()
