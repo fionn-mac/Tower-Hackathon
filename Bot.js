@@ -17,4 +17,4 @@ let bot = controller.spawn({
 let normalizedPath = path.join(__dirname, "skills");
 
 fs.readdirSync(normalizedPath).forEach(function(file) {
-  require("./skills/" + file)(controller);
+  require(path.join("./skills/", file))(controller);
