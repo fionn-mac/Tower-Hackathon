@@ -14,11 +14,52 @@ let getSuggestions = function() {
   // TODO: return string
 }
 
+
+
+let getTime = function() {
+   let date = new Date();
+   return date.getHours().toString() + '.' + parseInt(date.getMinutes()/15)*15;
+}
+
+
+
+
 module.exports = function(bot, message) {
   let isFreeSrcDB = true;
   let isFreeSrcFeed = true;
   let time;
   // TODO: Query Database to find if busy
+
+
+
+const sqlite3 = require('sqlite3').verbose();
+// open the database
+let db = new sqlite3.Database('../../db/test.db');
+let curTime = 0.0;
+currTime = getTime(); 
+let sql = `SELECT * FROM bookings WHERE startTime = ` + currTime;
+ 
+db.all(sql, [], (err, rows) => {
+  if (err) {
+    throw err;
+  }
+
+
+  rows.forEach((row) => {
+    if (row.isBooked == 0)
+	isFreeSrcDB = true;
+    else
+	isFreeSrcDB = false;
+  });
+
+
+}); 
+// close the database connection
+db.close(); 
+
+
+
+
   // TODO: If free, also find till when!
 
   // TODO: If Database return free, check stream for imprompteau users.
