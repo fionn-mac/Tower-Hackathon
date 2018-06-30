@@ -41,6 +41,23 @@ let parseTime = function(time, hours, min) {
   }
 }
 
+
+let endTime = function(time) {
+  let h = Math.floor(time)
+  let m = Math.round((time-h)*100)
+  m += 15;
+  if (m >=60) {
+    m -= 60;
+    h++;
+  }
+
+  if (h >= 24) {
+    return 23.59
+  } else {
+    return h+(m/100.0)
+  }
+}
+
 let makeQuery = function(db, sql) {
   return new Promise((resolve, reject) => {
     let schedule = '';
@@ -49,12 +66,24 @@ let makeQuery = function(db, sql) {
         reject(err);
         return;
       }
-
-      console.log(rows);
+      console.log(rows)
+      schedule += "Start Time \t End Time \t Booked\n"
       rows.forEach((row) => {
-        if (row.isBooked) {
-          schedule += `${JSON.stringify(row)}\n`
+        schedule += "      " 
+        schedule += row.startTime.toFixed(2) 
+        schedule += " \t\t   " 
+        schedule += endTime(row.startTime).toFixed(2) 
+        schedule += " \t\t   " 
+        if(row.isBooked==1){
+          schedule += "Booked\n" 
         }
+        else{
+          schedule += "Free\n"  
+        }
+        
+        // if (row.isBooked) {
+        //   schedule += `${JSON.stringify(row)}\n`
+        // }
       });
       resolve(schedule);
     });
