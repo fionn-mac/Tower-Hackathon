@@ -6,9 +6,9 @@ let path = require('path');
 
 let book = require(path.join(__dirname, 'Helpers/Book.js'));
 let status = require(path.join(__dirname, 'Helpers/Status.js'));
-let status = require(path.join(__dirname, 'Helpers/Schedule.js'));
+let schedule = require(path.join(__dirname, 'Helpers/Schedule.js'));
 
-const TIME = `^(?:[0-9]|0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$`;
+const TIME = `^(?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$`;
 const SCHEDULE_COMMANDS = ['\\s*schedule\\s*', `\\s*schedule from ${TIME}\\s*`, `\\s*schedule from ${TIME} to ${TIME}\\s*`]
 
 module.exports = function(controller) {
