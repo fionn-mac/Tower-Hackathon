@@ -74,16 +74,12 @@ let makeQuery = function(db, sql) {
         schedule += " \t\t   " 
         schedule += endTime(row.startTime).toFixed(2) 
         schedule += " \t\t   " 
-        if(row.isBooked==1){
+        if(row.isBooked==1) {
           schedule += "Booked\n" 
         }
         else{
           schedule += "Free\n"  
         }
-        
-        // if (row.isBooked) {
-        //   schedule += `${JSON.stringify(row)}\n`
-        // }
       });
       resolve(schedule);
     });
@@ -92,6 +88,7 @@ let makeQuery = function(db, sql) {
 
 module.exports = async function(bot, message) {
   let command = message.text.split(' ');
+  console.log(command);
   let usageError = false;
   let schedule;
 
@@ -105,14 +102,14 @@ module.exports = async function(bot, message) {
     // Query Database for schedule of next 2 hours
     startTime = getTime(0);
     endTime = getTime(2);
-  } else if (command.length === 2) {
+  } else if (command.length === 3) {
     // Query Database for schedule of 2 hours from specified time
-    startTime = parseTime(command[1]);
-    endTime = parseTime(command[1], 2);
+    startTime = parseTime(command[2]);
+    endTime = parseTime(command[2], 2);
   } else {
     // Query Database for schedule from specified time to specified time
-    startTime = parseTime(command[1]);
-    endTime = parseTime(command[3]);
+    startTime = parseTime(command[2]);
+    endTime = parseTime(command[4]);
   }
 
   console.log(startTime, endTime);

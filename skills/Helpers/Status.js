@@ -53,7 +53,9 @@ module.exports = async function(bot, message) {
 
   // TODO: If free, also find till when!
 
-  // TODO: If Database return free, check stream for imprompteau users.
+  if (isFreeSrcDB) {
+    
+  }
 
   if (!isFreeSrcDB) {
     bot.reply(message, BUSY_NOW);

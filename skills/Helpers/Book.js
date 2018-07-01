@@ -4,10 +4,11 @@
 
 let path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+let db = new sqlite3.Database(path.join(__dirname, '../../db/test.db'));
 
 const SALUTATIONS = [`Hey! Great to see you here.`, `Ola! Welcome back!`];
 const BOOKING_TIME = [`So, what time are we looking at?`];
-const BOOKING_TIME_AGAIN = [`Would you like to try for a different time?`];
+const BOOKING_TIME_AGAIN = [`There seems to be a booking at the provided slot. Would you like to try for a different time?`];
 const BOOKING_DURATION = [`Cool! And for how long should I book the room?`];
 const DURATION_REMINDER = [`P.S.: Only 15 minutes or 30 minutes allowed! :wink:`]
 const UNAVAILABLE = [`Oops! The given time doesn't seem to be available :confused:`]
@@ -29,10 +30,10 @@ let askJoinees = ASK_JOINEES[Math.floor(Math.random()*ASK_JOINEES.length)];
 
 let time;
 let duration;
-let joinees;
 let callee;
+let joinees;
 
-let timeCheck = new RegExp(`^(?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$`);
+let timeCheck = new RegExp(`^(?:1[0-9]):[0-5][0-9]$`);
 let durationCheck = new RegExp(`15|30`);
 
 let parseTime = function(time, hours, min) {
@@ -80,7 +81,7 @@ let checkAvail = function(db, sql) {
   })
 }
 
-let insert = function(db, sql, args) {
+let update = function(db, sql, args) {
   return new Promise((resolve, reject) => {
     db.run(sql, args, function(err) {
       if (err) {
@@ -107,15 +108,25 @@ let workOnDuration = async function(response, convo) {
   if (durationCheck.test(duration)) {
     let startTime = parseTime(time, 0, 0);
     let endTime = parseTime(time, 0, duration);
-    let db = new sqlite3.Database(path.join(__dirname, '../../db/test.db'));
     let sql = `SELECT * FROM bookings WHERE startTime BETWEEN ${startTime} and ${endTime}`;
     let available = await checkAvail(db, sql);
 
     if (available) {
-      sql = `INSERT INTO bookings (isBooked, startTime, P1, bookedBy) VALUES(?, ?, ?, ?)`;
-      let args = [1, startTime, callee, callee];
-      await insert(db, sql, args);
-      convo.gotoThread('askJoinees');
+      try {
+        sql = `UPDATE bookings SET isBooked = ?, P1 = ?, bookedBy = ? WHERE startTime = ?`;
+        let args = [1, callee, callee, startTime];
+        await update(db, sql, args);
+        if (duration === '30') {
+          startTime = parseTime(time, 0, 15);
+          args = [1, callee, callee, startTime];
+          await update(db, sql, args);
+        }
+        convo.gotoThread('askJoinees');
+      } catch (error) {
+        convo.say(`I'm sorry, an unexpected error occurred.`);
+        console.error(error);
+        convo.next();
+      }
     } else {
       convo.say(unavailable);
       convo.gotoThread(`askTime`);
@@ -123,22 +134,22 @@ let workOnDuration = async function(response, convo) {
   } else {
     convo.gotoThread('invalidDuration');
   }
-  db.close();
 };
 
 let workOnJoinees = function(response, convo) {
   joinees = response.text;
   convo.say(`You invited ${joinees}.`)
+  db.close();
   convo.next()
 }
 
 module.exports = function(bot, message) {
   callee = message.user;
-
   let exitConvo = {
     pattern: 'quit',
     callback: function(response, convo) {
       convo.next();
+      db.close();
     },
   };
 
@@ -185,6 +196,14 @@ module.exports = function(bot, message) {
 
     convo.addQuestion(askJoinees, [
       exitConvo,
+      {
+        pattern: 'no',
+        callback: function(response, convo) {
+          convo.say('All right then. Enjoy the game!');
+          db.close();
+          convo.next();
+        },
+      },
       {
         default: true,
         callback: workOnJoinees,
