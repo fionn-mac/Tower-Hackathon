@@ -2,6 +2,7 @@
 * @module skills/Helpers/Status.js
 */
 
+let fs = require("fs");
 let path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 
@@ -39,7 +40,6 @@ let makeQuery = function(db, sql) {
 module.exports = async function(bot, message) {
   let isFreeSrcDB = true;
   let isFreeSrcFeed = true;
-  // let time;
 
   // Open the database.
   let db = new sqlite3.Database(path.join(__dirname, '../../db/test.db'));
@@ -51,10 +51,11 @@ module.exports = async function(bot, message) {
   // Close the database connection.
   db.close(); 
 
-  // TODO: If free, also find till when!
-
   if (isFreeSrcDB) {
-    
+    let status = fs.readFileSync(path.join(__dirname, `../../real-time-object-detection/status.txt`), 'utf8');
+    if (status === '1') {
+      isFreeSrcFeed = false;
+    }
   }
 
   if (!isFreeSrcDB) {

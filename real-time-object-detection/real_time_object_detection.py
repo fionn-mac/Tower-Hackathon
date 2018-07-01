@@ -35,9 +35,11 @@ net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
 # initialize the video stream, allow the cammera sensor to warmup,
 # and initialize the FPS counter
 print("[INFO] starting video stream...")
-vs = cv2.VideoCapture('/home/root1/real-time-object-detection/VID_20180629_192457.mp4')
+vs = cv2.VideoCapture('./VID_20180629_192457.mp4')
+vs = cv2.VideoCapture('./Caspian - Dust and Disquiet.mp4')
 #vs = VideoStream(src=0).start()
 #vs = VideoStream(src='/home/root1/Human-detection-and-Tracking/video/2.mp4').start()
+
 print(vs)
 time.sleep(2.0)
 fps = FPS().start()

@@ -13,7 +13,7 @@ let meme = require(path.join(__dirname, 'Helpers/Meme.js'));
 let reset = require(path.join(__dirname, 'Helpers/ResetAll.js'));
 
 const TIME = `(?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]`;
-const SCHEDULE_COMMANDS = ['\\s*schedule\\s*$', `\\s*schedule from ${TIME}\\s*$`, `\\s*schedule from ${TIME} to ${TIME}\\s*$`]
+const SCHEDULE_COMMANDS = ['\\s*getSchedule\\s*$', `\\s*getSchedule from ${TIME}\\s*$`, `\\s*getSchedule from ${TIME} to ${TIME}\\s*$`]
 const UNBOOK_COMMANDS = ['\\s*unbook all\\s*$', `\\s*unbook ${TIME}\\s*$`]
 
 module.exports = function(controller) {
