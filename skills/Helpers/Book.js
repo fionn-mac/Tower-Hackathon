@@ -29,8 +29,10 @@ let wrongDuration = WRONG_DURATION[Math.floor(Math.random()*WRONG_DURATION.lengt
 let askJoinees = ASK_JOINEES[Math.floor(Math.random()*ASK_JOINEES.length)];
 
 let time;
+let botCopy;
 let duration;
 let callee;
+let joinregexp = new RegExp('<@((?:[A-Z]|[0-9])*)>');
 let joinees;
 
 let timeCheck = new RegExp(`^(?:1[0-9]):[0-5][0-9]$`);
@@ -137,13 +139,24 @@ let workOnDuration = async function(response, convo) {
 };
 
 let workOnJoinees = function(response, convo) {
-  joinees = response.text;
-  convo.say(`You invited ${joinees}.`)
+  let temp = joinregexp.exec(response.text);
+  if (temp.length > 1) {
+    joinees = temp.slice(1);
+    joinees.forEach(function(joinee) {
+      botCopy.api.conversations.open({users: joinee}, function(err, response) {
+        botCopy.api.chat.postMessage({channel: response.channel.id, text: `You've been invited to play T.T at ${time}`});
+      })
+    });
+    convo.say(`Invitations sent!`);
+  } else {
+    convo.say(`Uh-oh! I was expecting some direct mentions here :confused:\nIn any case, your booking's done!`);
+  }
   db.close();
   convo.next()
 }
 
 module.exports = function(bot, message) {
+  botCopy = bot;
   callee = message.user;
   let exitConvo = {
     pattern: 'quit',
