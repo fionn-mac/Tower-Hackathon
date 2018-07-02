@@ -10,6 +10,7 @@ let unbook = require(path.join(__dirname, 'Helpers/Unbook.js'));
 let status = require(path.join(__dirname, 'Helpers/Status.js'));
 let schedule = require(path.join(__dirname, 'Helpers/Schedule.js'));
 let meme = require(path.join(__dirname, 'Helpers/Meme.js'));
+let help = require(path.join(__dirname, 'Helpers/Help.js'));
 let reset = require(path.join(__dirname, 'Helpers/ResetAll.js'));
 
 const TIME = `(?:0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]`;
@@ -31,6 +32,10 @@ module.exports = function(controller) {
 
   controller.hears('\\s*i am bored$', 'direct_message', function(bot, message) {
     meme(bot, message);
+  });
+
+  controller.hears('\\s*help$', 'direct_message', function(bot, message) {
+    help(bot, message);
   });
 
   controller.hears(SCHEDULE_COMMANDS, 'direct_message', function(bot, message) {
